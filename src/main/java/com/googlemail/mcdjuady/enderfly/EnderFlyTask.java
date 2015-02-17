@@ -37,11 +37,13 @@ public class EnderFlyTask extends BukkitRunnable {
             cancel();
             return;
         }
-        int durability = (1 + item.getDurability());
+        int durability = Math.max((player.isSprinting() ? 3 : 1) + item.getDurability(), 0); //Sprinting costs 3 times as much as normal flight
+        int prevTimeLeft = (max - item.getDurability()) / EnderFly.ONE_SEC;
+        int newTimeLeft = (max - durability) / EnderFly.ONE_SEC;
         item.setDurability((short) durability);
-        if (durability % EnderFly.ONE_SEC == 0) {
+        if (prevTimeLeft != newTimeLeft) {
             int[] numbers = EnderFly.getNumbers(item);
-            numbers[1] -= 1;
+            numbers[1] = (max - durability) / EnderFly.ONE_SEC;
             EnderFly.writeLore(item, numbers);
         }
         if (durability >= max) {

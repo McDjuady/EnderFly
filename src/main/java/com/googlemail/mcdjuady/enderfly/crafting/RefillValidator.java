@@ -40,7 +40,7 @@ public class RefillValidator implements ShapelessValidator {
             return null;
         }
         timeLeft = Math.min(actualPearls * EnderFly.SEC_PER_PEARL + timeLeft, enderFly.getType().getMaxDurability() / EnderFly.ONE_SEC);
-        String time = String.format(EnderFly.ENDERFLY_TIME, timeLeft + "s", enderFly.getType().getMaxDurability() / EnderFly.ONE_SEC + "s");
+        String time = String.format(EnderFly.ENDERFLY_TIME, timeLeft, enderFly.getType().getMaxDurability() / EnderFly.ONE_SEC);
         info = Util.hideString(String.format(EnderFly.ENDERFLY_STRING, numbers[0], timeLeft, numbers[2]));
         ItemMeta meta = enderFly.getItemMeta();
         lore.remove(2);
