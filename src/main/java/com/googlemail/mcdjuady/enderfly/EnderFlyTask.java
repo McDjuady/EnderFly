@@ -5,11 +5,8 @@
  */
 package com.googlemail.mcdjuady.enderfly;
 
-import com.googlemail.mcdjuady.enderfly.util.Util;
-import java.util.List;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;

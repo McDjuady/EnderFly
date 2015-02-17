@@ -19,7 +19,6 @@ public class LoreResultBuilder implements ShapedResultBuilder{
     private ItemStack result;
     
     public LoreResultBuilder(ItemStack result) {
-        //System.out.println("hasLore "+result.getItemMeta().getLore() == null);
         this.result = result.clone();
     }
     
@@ -37,7 +36,6 @@ public class LoreResultBuilder implements ShapedResultBuilder{
 
     @Override
     public ItemStack getResult(ItemStack[] matrix) {
-        //System.out.println("GetResult "+result.getItemMeta().getLore() == null);
         return result.clone();
     }
     

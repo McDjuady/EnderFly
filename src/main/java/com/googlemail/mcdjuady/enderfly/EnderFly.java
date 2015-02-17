@@ -6,7 +6,6 @@
 package com.googlemail.mcdjuady.enderfly;
 
 import com.googlemail.mcdjuady.craftutils.CraftUtils;
-import com.googlemail.mcdjuady.craftutils.CustomRecipeManager;
 import com.googlemail.mcdjuady.enderfly.crafting.EnderFlyUpgradeResultBuilder;
 import com.googlemail.mcdjuady.enderfly.crafting.EnderFlyValidator;
 import com.googlemail.mcdjuady.craftutils.recipes.ShapedAdvancedRecipe;
@@ -16,16 +15,13 @@ import com.googlemail.mcdjuady.enderfly.crafting.RefillValidator;
 import com.googlemail.mcdjuady.enderfly.util.Util;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
@@ -154,7 +150,6 @@ public class EnderFly extends JavaPlugin {
         goldMeta.setLore(lore);
         goldEnderFly.setItemMeta(goldMeta);
         goldEnderFly.addUnsafeEnchantment(Enchantment.PROTECTION_FALL, 5);
-        //goldEnderFly.setDurability(MAX_GOLD);
 
         lore.remove(1);
         lore.add(1, "Time Left: 0s / " + MAX_IRON / ONE_SEC + "s");
@@ -164,7 +159,6 @@ public class EnderFly extends JavaPlugin {
         iroMeta.setLore(lore);
         ironEnderFly.setItemMeta(iroMeta);
         ironEnderFly.addUnsafeEnchantment(Enchantment.PROTECTION_FALL, 5);
-        //ironEnderFly.setDurability(MAX_IRON);
 
         lore.remove(1);
         lore.add(1, "Time Left: 0s / " + MAX_IRON / ONE_SEC + "s");
@@ -174,7 +168,6 @@ public class EnderFly extends JavaPlugin {
         chainMeta.setLore(lore);
         chainEnderFly.setItemMeta(chainMeta);
         chainEnderFly.addUnsafeEnchantment(Enchantment.PROTECTION_FALL, 5);
-        //chainEnderFly.setDurability(MAX_IRON);
 
         lore.remove(1);
         lore.add(1, "Time Left: 0s / " + MAX_DIAMOND / ONE_SEC + "s");
@@ -184,7 +177,6 @@ public class EnderFly extends JavaPlugin {
         diamondMeta.setLore(lore);
         diamondEnderFly.setItemMeta(diamondMeta);
         diamondEnderFly.addUnsafeEnchantment(Enchantment.PROTECTION_FALL, 5);
-        //diamondEnderFly.setDurability(MAX_DIAMOND);
 
         //Normal recipes
         //Lore doesn't get copied by normal recipes
@@ -245,7 +237,6 @@ public class EnderFly extends JavaPlugin {
         CraftUtils.getRecipeManager().addRecipe(chainRefillRecipe);
         CraftUtils.getRecipeManager().addRecipe(diamondRefillRecipe);
 
-        this.getCommand("durability").setExecutor(new TestCommand());
         Bukkit.getPluginManager().registerEvents(new EnderFlyListener(), this);
     }
 

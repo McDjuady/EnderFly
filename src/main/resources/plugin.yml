@@ -2,10 +2,4 @@
 ---
 name: EnderFly
 main: com.googlemail.mcdjuady.enderfly.EnderFly
-version: 0.1
-commands:
-   durability:
-      description: Set the durability of the item in hand
-      usage: /<command> durability
-      permission: <plugin name>.durability
-      permission-message: You don't have <permission>
+version: 1.0-Beta

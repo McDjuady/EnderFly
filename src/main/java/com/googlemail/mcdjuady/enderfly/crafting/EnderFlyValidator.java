@@ -9,7 +9,6 @@ import com.googlemail.mcdjuady.craftutils.validators.IngredientValidator;
 import com.googlemail.mcdjuady.enderfly.EnderFly;
 import com.googlemail.mcdjuady.enderfly.util.Util;
 import java.util.List;
-import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
 /**

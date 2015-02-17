@@ -11,7 +11,6 @@ import com.googlemail.mcdjuady.enderfly.util.Util;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -24,7 +23,6 @@ public class RefillValidator implements ShapelessValidator {
 
     @Override
     public ItemStack getResult(List<ItemStack> ingredients) {
-        Bukkit.getLogger().info("getResult");
         ItemStack enderPearl, enderFly;
         if (ingredients.get(0).getType() == Material.ENDER_PEARL) {
             enderPearl = ingredients.get(0);
@@ -38,11 +36,9 @@ public class RefillValidator implements ShapelessValidator {
         String[] numbers = info.replace("[" + EnderFly.ENDERFLY_PREFIX + "]", "").split("-");
         int timeLeft = Integer.valueOf(numbers[1]);
         int actualPearls = getNumPearls(enderFly, enderPearl);
-        Bukkit.getLogger().info("AP " + actualPearls);
         if (actualPearls == 0) {
             return null;
         }
-        //int durability = Math.max(0, enderFly.getType().getMaxDurability() - (timeLeft + actualPearls * EnderFly.SEC_PER_PEARL) * EnderFly.ONE_SEC);
         timeLeft = Math.min(actualPearls * EnderFly.SEC_PER_PEARL + timeLeft, enderFly.getType().getMaxDurability() / EnderFly.ONE_SEC);
         String time = String.format(EnderFly.ENDERFLY_TIME, timeLeft + "s", enderFly.getType().getMaxDurability() / EnderFly.ONE_SEC + "s");
         info = Util.hideString(String.format(EnderFly.ENDERFLY_STRING, numbers[0], timeLeft, numbers[2]));
@@ -57,13 +53,11 @@ public class RefillValidator implements ShapelessValidator {
     }
 
     private int getNumPearls(ItemStack enderFly, ItemStack enderPearl) {
-        Bukkit.getLogger().info("getNumPearls");
         List<String> lore = enderFly.getItemMeta().getLore();
         String info = Util.unhideString(lore.get(2));
         String[] numbers = info.replace("[" + EnderFly.ENDERFLY_PREFIX + "]", "").split("-");
         int timeLeft = Integer.valueOf(numbers[1]);
         int timeToFill = enderFly.getType().getMaxDurability() / EnderFly.ONE_SEC - timeLeft;
-        Bukkit.getLogger().info("TF " + timeToFill);
         if (timeToFill == 0) {
             return 0;
         }
@@ -76,7 +70,6 @@ public class RefillValidator implements ShapelessValidator {
 
     @Override
     public boolean validate(List<ItemStack> ingredients) {
-        Bukkit.getLogger().info("Validate");
         for (ItemStack item : ingredients) {
             if (item.getType() == Material.ENDER_PEARL && !item.hasItemMeta()) {
                 continue;
@@ -98,7 +91,6 @@ public class RefillValidator implements ShapelessValidator {
 
     @Override
     public Map<ItemStack, Integer> costMatrix(List<ItemStack> ingredients) {
-        Bukkit.getLogger().info("costMatrix");
         ItemStack enderPearl, enderFly;
         if (ingredients.get(0).getType() == Material.ENDER_PEARL) {
             enderPearl = ingredients.get(0);
