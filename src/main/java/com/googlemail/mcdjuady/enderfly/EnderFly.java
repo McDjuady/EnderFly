@@ -23,12 +23,14 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scheduler.BukkitRunnable;
 
 /**
  *
@@ -45,93 +47,96 @@ public class EnderFly extends JavaPlugin {
     public static final String ENDERFLY_PREFIX = "EnderFly";
     public static final String ENDERFLY_REGEX = "^\\[" + ENDERFLY_PREFIX + "\\]\\d-\\d*-\\d*$";
     public static final String ENDERFLY_STRING = "[" + ENDERFLY_PREFIX + "]%1$s-%2$s-%3$s";
-    public static final String ENDERFLY_TIME = "Time left: %1$s / %2$s";
+    public static final String ENDERFLY_TIME = "Time left: %1$ss / %2$ss";
     public static final int ENDERFLY_MININGMODIFIER = 18;
 
-    private static Map<Player, Integer> tasks = new HashMap<>();
+    private static Map<Player, BukkitRunnable> tasks = new HashMap<>();
 
-    public static void registerTask(Player p, int taskId) {
-        tasks.put(p, taskId);
+    public static void startTask(Player p, BukkitRunnable task) {
+        if (p == null || task == null) {
+            return;
+        }
+        stopTask(p); //cancel any task that is already running
+        task.runTaskTimer(EnderFly.getPlugin(EnderFly.class), 20 / ONE_SEC, 20 / ONE_SEC); //decrease durability by 
+        tasks.put(p, task);
     }
 
-    public static int getTask(Player p) {
-        return tasks.get(p);
+    public static void stopTask(Player p) {
+        if (p == null) {
+            return;
+        }
+        if (tasks.containsKey(p)) {
+            BukkitRunnable toCancel = tasks.get(p);
+            if (toCancel != null) {
+                toCancel.cancel();
+            }
+        }
     }
 
-    public static int removeTask(Player p) {
-        return tasks.remove(p);
+    public static boolean hasEnderFly(Player p) {
+        if (p == null) {
+            return false;
+        }
+        ItemStack chest = p.getInventory().getChestplate();
+        if (chest == null || chest.getType() == Material.AIR || !chest.hasItemMeta()) {
+            return false;
+        }
+        List<String> lore = chest.getItemMeta().getLore();
+        if (lore == null || lore.size() != 3) {
+            return false;
+        }
+        String info = Util.unhideString(lore.get(2));
+        return info.matches(ENDERFLY_REGEX);
     }
 
-    public static void enableEnderFly(ItemStack enderFly, Player player, boolean enable) {
-        if (enderFly == null || !enderFly.hasItemMeta()) {
-            System.out.println("Nullfly");
-            return;
+    public static int[] getNumbers(ItemStack enderFly) {
+        String info = Util.unhideString(enderFly.getItemMeta().getLore().get(2));
+        String[] split = info.replace("[" + ENDERFLY_PREFIX + "]", "").split("-");
+        int[] numbers = new int[3];
+        for (int i = 0; i < numbers.length; i++) {
+            numbers[i] = Integer.valueOf(split[i]);
         }
-        List<String> lore = enderFly.getItemMeta().getLore();
-        if (lore.size() != 3) {
-            System.out.println("Nolore");
-            return;
-        }
-        String info = Util.unhideString(lore.remove(2));
-        String name = lore.remove(0);
-        if (!info.matches(EnderFly.ENDERFLY_REGEX)) {
-            System.out.println("nomatch");
-            return;
-        }
-        String[] numbers = info.replace("[" + EnderFly.ENDERFLY_PREFIX + "]", "").split("-");
-        boolean enabled = Integer.valueOf(numbers[0]) == 1;
-        int timeLeft = Integer.valueOf(numbers[1]);
-        if (timeLeft < 1 && enable) {
-            player.sendMessage("Ender Fly is empty! Please refill!");
-            return;
-        }
-        int armorDurability = Integer.valueOf(numbers[2]);
-        //if we it's already enabled but we don't have a task  continue
-        if (enabled == enable && !(enable && !tasks.containsKey(player))) {
-            System.out.println("same");
-            return;
-        }
-        if (enable) {
-            //switch the durability
-            armorDurability = enderFly.getDurability();
-            enderFly.setDurability((short) (enderFly.getType().getMaxDurability() - ONE_SEC * timeLeft));
-            //apply flight
-            player.setAllowFlight(true);
-            //tp .1 up so flight doesn't get canceld imediately
-            player.teleport(player.getLocation().add(0, 0.1, 0));
-            player.setFlying(true);
-            //apply buffs for regular mining
-            player.addPotionEffect(new PotionEffect(PotionEffectType.FAST_DIGGING, 200, ENDERFLY_MININGMODIFIER, true, false), true);
-            //start the task
-            EnderFlyTask task = new EnderFlyTask(player, enderFly, (short) 1, enderFly.getType().getMaxDurability());
-            int taskId = task.runTaskTimer(Bukkit.getPluginManager().getPlugin("EnderFly"), 20 / ONE_SEC, 20 / ONE_SEC).getTaskId();
-            registerTask(player, taskId);
-            //create the new String
-            info = String.format(ENDERFLY_STRING, 1, timeLeft, armorDurability);
-            name = "EnderFly - Enabled";
+        return numbers;
+    }
+
+    public static boolean isEnderFlyEnabled(Player p) {
+        ItemStack enderFly = p.getInventory().getChestplate();
+        int[] numbers = getNumbers(enderFly);
+        return numbers[0] == 1;
+    }
+
+    public static void toggleEnderFly(Player p) {
+        ItemStack enderFly = p.getInventory().getChestplate();
+        int[] numbers = getNumbers(enderFly);
+        int durability = 0;
+        if (numbers[0] == 1) {
+            stopTask(p);
+            durability = numbers[2];
+            p.removePotionEffect(PotionEffectType.FAST_DIGGING);
+            p.setFallDistance(0);
+            p.setAllowFlight(false);
         } else {
-            //switch the durability
-            timeLeft = (enderFly.getType().getMaxDurability() - enderFly.getDurability()) / ONE_SEC;
-            enderFly.setDurability((short) armorDurability);
-            //apply flight
-            player.setAllowFlight(false);
-            //remove buff
-            player.removePotionEffect(PotionEffectType.FAST_DIGGING);
-            //reset fall damage
-            player.setFallDistance(0);
-            //stop the task
-            int taskId = removeTask(player);
-            Bukkit.getScheduler().cancelTask(taskId);
-            //create the new String
-            info = String.format(ENDERFLY_STRING, 0, timeLeft, armorDurability);
-            name = "EnderFly - Disabled";
+            startTask(p, new EnderFlyTask(p));
+            durability = enderFly.getType().getMaxDurability() - numbers[1] * ONE_SEC;
+            numbers[2] = enderFly.getDurability();
+            p.addPotionEffect(new PotionEffect(PotionEffectType.FAST_DIGGING, 200, ENDERFLY_MININGMODIFIER), true);
+            p.setAllowFlight(true);
+            p.teleport(p.getLocation().add(0, .1, 0)); //port up so flight doesn't get cancled instantly
+            p.setFlying(true);
         }
-        lore.add(0, name);
-        lore.add(Util.hideString(info));
+        numbers[0] = (numbers[0] + 1) % 2; //yes i had to ( 1 -> 0 | 0 -> 1)
+        enderFly.setDurability((short) durability);
+        writeLore(enderFly, numbers);
+    }
+
+    public static void writeLore(ItemStack enderFly, int[] numbers) {
+        List<String> lore = new ArrayList<String>();
+        lore.add("EnderFly - " + (numbers[0] == 1 ? "Enabled" : "Disabled"));
+        lore.add(String.format(ENDERFLY_TIME, numbers[1], enderFly.getType().getMaxDurability() / ONE_SEC));
+        lore.add(Util.hideString(String.format(ENDERFLY_STRING, numbers[0], numbers[1], numbers[2])));
         ItemMeta meta = enderFly.getItemMeta();
         meta.setLore(lore);
         enderFly.setItemMeta(meta);
-        //player.updateInventory();
     }
 
     public void onEnable() {

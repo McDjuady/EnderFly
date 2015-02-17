@@ -5,19 +5,14 @@
  */
 package com.googlemail.mcdjuady.enderfly;
 
-import com.googlemail.mcdjuady.enderfly.util.Util;
-import java.util.Arrays;
-import java.util.List;
-import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
-import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerToggleFlightEvent;
-import org.bukkit.inventory.ItemStack;
 
 /**
  *
@@ -27,49 +22,49 @@ public class EnderFlyListener implements Listener {
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent e) {
-        e.getWhoClicked().sendMessage("Click " + e.getClick());
-        if (!(e.getWhoClicked() instanceof Player) || e.getCurrentItem() == null) {
-            return;
-        }
-        Player player = (Player) e.getWhoClicked();
-        ItemStack currentItem = e.getCurrentItem();
-        if (player.getGameMode() == GameMode.CREATIVE || currentItem == null || !currentItem.equals(player.getInventory().getChestplate()) || !currentItem.hasItemMeta()) {
-            return;
-        }
-        List<String> lore = currentItem.getItemMeta().getLore();
-        if (lore == null || lore.size() != 3) {
-            return;
-        }
-        String info = Util.unhideString(lore.get(2));
-        if (!info.matches(EnderFly.ENDERFLY_REGEX)) {
-            return;
-        }
-        switch (e.getClick()) {
-            case MIDDLE:
-                String[] numbers = info.replace("[" + EnderFly.ENDERFLY_PREFIX + "]", "").split("-");
-                e.getWhoClicked().sendMessage(Arrays.toString(numbers));
-                EnderFly.enableEnderFly(currentItem, player, Integer.valueOf(numbers[0]) != 1);
-                player.updateInventory();
-                break;
-            default:
-                //disable if take out
-                EnderFly.enableEnderFly(currentItem, player, false);
+        Player p = (Player) e.getWhoClicked();
+        if (EnderFly.hasEnderFly(p) && p.getInventory().getChestplate().equals(e.getCurrentItem())) {
+            switch (e.getClick()) {
+                case MIDDLE:
+                    EnderFly.toggleEnderFly(p);
+                    break;
+                default:
+                    //Disable it if it is enabled
+                    if (EnderFly.isEnderFlyEnabled(p)) {
+                        EnderFly.toggleEnderFly(p);
+                    }
+            }
+            p.updateInventory(); //Update the inv since the durability sometimes doesn't get sent
         }
     }
 
     @EventHandler
     public void onToggleFlight(PlayerToggleFlightEvent e) {
-        e.getPlayer().sendMessage("Toggle " + e.isFlying());
-        if (e.isCancelled()) {
+        Player p = e.getPlayer();
+        if (p.getGameMode() == GameMode.CREATIVE || p.getGameMode() == GameMode.SPECTATOR || e.isFlying()) {
             return;
         }
-        if (!e.isFlying()) {
-            Player p = e.getPlayer();
-            ItemStack chest = p.getInventory().getChestplate();
-            if (p.getGameMode() == GameMode.CREATIVE || chest == null || !chest.hasItemMeta()) {
-                return;
-            }
-            EnderFly.enableEnderFly(chest, p, false); //checks are done inside here
+        if (EnderFly.hasEnderFly(p) && EnderFly.isEnderFlyEnabled(p)) {
+            EnderFly.toggleEnderFly(p);
+        }
+    }
+
+    @EventHandler
+    public void onLogout(PlayerQuitEvent e) {
+        Player p = e.getPlayer();
+        if (EnderFly.hasEnderFly(p) && EnderFly.isEnderFlyEnabled(p)) {
+            EnderFly.stopTask(p);
+        }
+    }
+
+    @EventHandler
+    public void onLogin(PlayerJoinEvent e) {
+        Player p = e.getPlayer();
+        if (EnderFly.hasEnderFly(p) && EnderFly.hasEnderFly(p)) {
+            EnderFly.startTask(p, new EnderFlyTask(p)); //start the task back up
+            p.setAllowFlight(true);
+            p.teleport(p.getLocation().add(0, .1, 0)); //port up so flight doesn't get cancled instantly
+            p.setFlying(true);
         }
     }
 

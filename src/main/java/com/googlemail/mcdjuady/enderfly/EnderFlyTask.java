@@ -21,46 +21,38 @@ import org.bukkit.scheduler.BukkitRunnable;
 public class EnderFlyTask extends BukkitRunnable {
 
     private ItemStack item;
-    private short ammount;
-    private short max;
+    private int max;
     private Player player;
 
-    public EnderFlyTask(Player p, ItemStack item, short ammount, short max) {
-        this.item = item;
-        this.ammount = ammount;
-        this.max = max;
+    public EnderFlyTask(Player p) {
+        if (!EnderFly.hasEnderFly(p)) {
+            return;
+        }
         this.player = p;
+        item = p.getInventory().getChestplate();
+        max = item.getType().getMaxDurability();
+
     }
 
     @Override
     public void run() {
-
-        //check the durability
-        short durability = (short) (ammount + item.getDurability());
+        if (player == null) {
+            cancel();
+            return;
+        }
+        int durability = (1 + item.getDurability());
+        item.setDurability((short) durability);
         if (durability % EnderFly.ONE_SEC == 0) {
-            //we need to update the lore
-            List<String> lore = item.getItemMeta().getLore();
-            String info = Util.unhideString(lore.remove(2));
-            String[] numbers = info.replace("[" + EnderFly.ENDERFLY_PREFIX + "]", "").split("-");
-            int armorDurability = Integer.valueOf(numbers[2]);
-            int maxTime = item.getType().getMaxDurability() / EnderFly.ONE_SEC;
-            int timeLeft = maxTime - (durability / EnderFly.ONE_SEC);
-            info = String.format(EnderFly.ENDERFLY_STRING, 1, timeLeft, armorDurability);
-            lore.remove(1);
-            String visibleLore = String.format(EnderFly.ENDERFLY_TIME, timeLeft + "s", maxTime + "s");
-            lore.add(visibleLore);
-            lore.add(Util.hideString(info));
-            ItemMeta meta = item.getItemMeta();
-            meta.setLore(lore);
-            item.setItemMeta(meta);
+            int[] numbers = EnderFly.getNumbers(item);
+            numbers[1] -= 1;
+            EnderFly.writeLore(item, numbers);
         }
         if (durability >= max) {
-            //end the task
-            EnderFly.enableEnderFly(item, player, false);
+            //toggle off
+            EnderFly.toggleEnderFly(player);
         } else {
             //update the potion effect
             player.addPotionEffect(new PotionEffect(PotionEffectType.FAST_DIGGING, 200, EnderFly.ENDERFLY_MININGMODIFIER, true, false), true);
-            item.setDurability(durability);
         }
     }
 
