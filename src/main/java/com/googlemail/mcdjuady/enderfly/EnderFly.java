@@ -142,7 +142,7 @@ public class EnderFly extends JavaPlugin {
         ItemStack diamondEnderFly = new ItemStack(Material.DIAMOND_CHESTPLATE);
         List<String> lore = new ArrayList<String>();
         lore.add("EnderFly - Disabled");
-        lore.add("Time Left: 0s / " + MAX_GOLD / ONE_SEC + "s");
+        lore.add("Time Left: 0s / " + MAX_GOLD / ONE_SEC);
         lore.add(Util.hideString(String.format(ENDERFLY_STRING, 0, 0, 0)));
 
         ItemMeta goldMeta = goldEnderFly.getItemMeta();
@@ -152,7 +152,7 @@ public class EnderFly extends JavaPlugin {
         goldEnderFly.addUnsafeEnchantment(Enchantment.PROTECTION_FALL, 5);
 
         lore.remove(1);
-        lore.add(1, "Time Left: 0s / " + MAX_IRON / ONE_SEC + "s");
+        lore.add(1, "Time Left: 0s / " + MAX_IRON / ONE_SEC );
 
         ItemMeta iroMeta = ironEnderFly.getItemMeta();
         iroMeta.setDisplayName("Iron Ender Fly");
@@ -161,7 +161,7 @@ public class EnderFly extends JavaPlugin {
         ironEnderFly.addUnsafeEnchantment(Enchantment.PROTECTION_FALL, 5);
 
         lore.remove(1);
-        lore.add(1, "Time Left: 0s / " + MAX_IRON / ONE_SEC + "s");
+        lore.add(1, "Time Left: 0s / " + MAX_IRON / ONE_SEC);
 
         ItemMeta chainMeta = chainEnderFly.getItemMeta();
         chainMeta.setDisplayName("Chain Ender Fly");
@@ -170,7 +170,7 @@ public class EnderFly extends JavaPlugin {
         chainEnderFly.addUnsafeEnchantment(Enchantment.PROTECTION_FALL, 5);
 
         lore.remove(1);
-        lore.add(1, "Time Left: 0s / " + MAX_DIAMOND / ONE_SEC + "s");
+        lore.add(1, "Time Left: 0s / " + MAX_DIAMOND / ONE_SEC);
 
         ItemMeta diamondMeta = diamondEnderFly.getItemMeta();
         diamondMeta.setDisplayName("Diamond Ender Fly");
