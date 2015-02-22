@@ -3,3 +3,4 @@
 name: EnderFly
 main: com.googlemail.mcdjuady.enderfly.EnderFly
 version: 1.0-Beta
+depend: [CraftUtils]
