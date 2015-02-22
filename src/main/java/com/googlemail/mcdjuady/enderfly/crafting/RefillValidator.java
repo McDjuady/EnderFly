@@ -70,23 +70,29 @@ public class RefillValidator implements ShapelessValidator {
 
     @Override
     public boolean validate(List<ItemStack> ingredients) {
-        for (ItemStack item : ingredients) {
-            if (item.getType() == Material.ENDER_PEARL && !item.hasItemMeta()) {
-                continue;
-            }
-            if (!item.hasItemMeta()) {
-                return false;
-            }
-            List<String> lore = item.getItemMeta().getLore();
-            if (lore == null || lore.size() != 3) {
-                return false;
-            }
-            String info = Util.unhideString(lore.get(2));
-            if (!info.matches(EnderFly.ENDERFLY_REGEX)) {
-                return false;
-            }
+        if (ingredients.size() != 2) {
+            return false;
         }
-        return true;
+        ItemStack enderPearl, enderFly;
+        if (ingredients.get(0).getType() == Material.ENDER_PEARL) {
+            enderPearl = ingredients.get(0);
+            enderFly = ingredients.get(1).clone();
+        } else {
+            enderPearl = ingredients.get(1);
+            enderFly = ingredients.get(0).clone();
+        }
+        if (!enderFly.hasItemMeta()) {
+            return false;
+        }
+        List<String> lore = enderFly.getItemMeta().getLore();
+        if (lore == null || lore.size() != 3) {
+            return false;
+        }
+        String info = Util.unhideString(lore.get(2));
+        if (!info.matches(EnderFly.ENDERFLY_REGEX)) {
+            return false;
+        }
+        return getNumPearls(enderFly, enderPearl) > 0;
     }
 
     @Override

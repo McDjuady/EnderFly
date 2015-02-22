@@ -16,7 +16,7 @@ import org.bukkit.inventory.ItemStack;
  */
 public class LoreResultBuilder implements ShapedResultBuilder{
     
-    private ItemStack result;
+    private final ItemStack result;
     
     public LoreResultBuilder(ItemStack result) {
         this.result = result.clone();
@@ -36,7 +36,9 @@ public class LoreResultBuilder implements ShapedResultBuilder{
 
     @Override
     public ItemStack getResult(ItemStack[] matrix) {
-        return result.clone();
+        ItemStack resultStack = result.clone();
+        resultStack.addEnchantments(matrix[4].getEnchantments());
+        return resultStack;
     }
     
 }
