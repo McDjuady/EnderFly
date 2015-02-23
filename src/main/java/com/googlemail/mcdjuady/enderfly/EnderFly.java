@@ -104,6 +104,7 @@ public class EnderFly extends JavaPlugin {
     public static void toggleEnderFly(Player p) {
         ItemStack enderFly = p.getInventory().getChestplate();
         int[] numbers = getNumbers(enderFly);
+
         int durability = 0;
         if (numbers[0] == 1) {
             stopTask(p);
@@ -112,6 +113,9 @@ public class EnderFly extends JavaPlugin {
             p.setFallDistance(0);
             p.setAllowFlight(false);
         } else {
+            if (numbers[1] <= 0) {
+                return; //don't enable if we have no time left
+            }
             startTask(p, new EnderFlyTask(p));
             durability = enderFly.getType().getMaxDurability() - numbers[1] * ONE_SEC;
             numbers[2] = enderFly.getDurability();
@@ -152,7 +156,7 @@ public class EnderFly extends JavaPlugin {
         goldEnderFly.addUnsafeEnchantment(Enchantment.PROTECTION_FALL, 5);
 
         lore.remove(1);
-        lore.add(1, "Time Left: 0s / " + MAX_IRON / ONE_SEC );
+        lore.add(1, "Time Left: 0s / " + MAX_IRON / ONE_SEC);
 
         ItemMeta iroMeta = ironEnderFly.getItemMeta();
         iroMeta.setDisplayName("Iron Ender Fly");
@@ -238,6 +242,13 @@ public class EnderFly extends JavaPlugin {
         CraftUtils.getRecipeManager().addRecipe(diamondRefillRecipe);
 
         Bukkit.getPluginManager().registerEvents(new EnderFlyListener(), this);
+
+        //if we reload we wan't to check if some players wer enabled
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            if (hasEnderFly(p) && isEnderFlyEnabled(p)) {
+                startTask(p, new EnderFlyTask(p));
+            }
+        }
     }
 
 }
